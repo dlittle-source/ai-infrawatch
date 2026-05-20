@@ -17,10 +17,13 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            whoami
+            hostname
             cd /home/ubuntu/ai-infrawatch
-            git branch
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             docker compose down
             docker compose up --build -d
             docker ps
+            sleep 15
             curl -f http://localhost/api/health
