@@ -1,0 +1,26 @@
+name: Deploy AI InfraWatch to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/ai-infrawatch
+            git pull origin master
+            docker compose down
+            docker compose up --build -d
+            docker ps
+            curl -f http://localhost/api/health
