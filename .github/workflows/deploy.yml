@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - master
 
 jobs:
   deploy:
@@ -17,9 +16,12 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 20m
           script: |
             cd /home/ubuntu/ai-infrawatch
-            git pull origin master
+            git pull origin main
             docker compose down
             docker compose up --build -d
             docker ps
