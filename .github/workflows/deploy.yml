@@ -19,8 +19,12 @@ jobs:
           port: 22
           timeout: 60s
           command_timeout: 20m
+          debug: true
           script: |
+            whoami
+            hostname
             cd /home/ubuntu/ai-infrawatch
+            git branch
             git pull origin main
             docker compose down
             docker compose up --build -d
