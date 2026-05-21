@@ -2,6 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import SystemHealthBanner from "@/components/SystemHealthBanner";
+import OperationalMetricsPanel from "@/components/OperationalMetricsPanel";
+import InfrastructureTopologyPanel from "@/components/InfrastructureTopologyPanel";
+import CICDStatusPanel from "@/components/CICDStatusPanel";
+import DeploymentHistoryPanel from "@/components/DeploymentHistoryPanel";
+import DeploymentTimelinePanel from "@/components/DeploymentTimelinePanel";
+
 type Service = {
   id: number;
   name: string;
@@ -61,7 +68,6 @@ export default function Home() {
 
       try {
         if (showLoading) setLoading(true);
-
         setApiError("");
 
         const [servicesRes, incidentsRes, logsRes] = await Promise.all([
@@ -78,13 +84,10 @@ export default function Home() {
         const incidentsData = await incidentsRes.json();
         const logsData = await logsRes.json();
 
-        console.log("servicesData:", servicesData);
-        console.log("incidentsData:", incidentsData);
-        console.log("logsData:", logsData);
-
         setServices(normalizeArray<Service>(servicesData, "services"));
         setIncidents(normalizeArray<Incident>(incidentsData, "incidents"));
         setLogs(normalizeArray<LogEntry>(logsData, "logs"));
+
         setSecondsAgo(0);
       } catch (error) {
         console.error(error);
@@ -139,27 +142,28 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <header className="border-b border-zinc-800 bg-zinc-900">
+      <header className="border-b border-zinc-800 bg-zinc-900/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               AI InfraWatch
             </h1>
+
             <p className="mt-1 text-sm text-zinc-400">
               AI-Powered Infrastructure Monitoring & Incident Response Platform
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-zinc-400">
-              Last refreshed:{" "}
-              <span className="font-medium text-zinc-200">
-                {secondsAgo} seconds ago
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm text-zinc-400">
+              Last refreshed:
+              <span className="ml-2 font-medium text-zinc-200">
+                {secondsAgo}s ago
               </span>
             </div>
 
             <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400">
-              ● Backend Connected
+              ● Production Connected
             </div>
           </div>
         </div>
@@ -181,21 +185,21 @@ export default function Home() {
         {!loading && !apiError && (
           <div className="space-y-8">
             <div className="grid gap-6 md:grid-cols-3">
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg">
+              <div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-emerald-500/10 to-zinc-900 p-6 shadow-lg">
                 <p className="text-sm text-zinc-400">Healthy Services</p>
                 <h2 className="mt-3 text-4xl font-bold text-emerald-400">
                   {healthyCount}
                 </h2>
               </div>
 
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg">
+              <div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-yellow-500/10 to-zinc-900 p-6 shadow-lg">
                 <p className="text-sm text-zinc-400">Warning Services</p>
                 <h2 className="mt-3 text-4xl font-bold text-yellow-400">
                   {warningCount}
                 </h2>
               </div>
 
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg">
+              <div className="rounded-2xl border border-zinc-800 bg-gradient-to-br from-red-500/10 to-zinc-900 p-6 shadow-lg">
                 <p className="text-sm text-zinc-400">Critical Services</p>
                 <h2 className="mt-3 text-4xl font-bold text-red-400">
                   {criticalCount}
@@ -213,7 +217,7 @@ export default function Home() {
                   <select
                     value={selectedStatus}
                     onChange={(event) => setSelectedStatus(event.target.value)}
-                    className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white"
+                    className="rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none"
                   >
                     <option value="All">All</option>
                     <option value="Healthy">Healthy</option>
@@ -226,7 +230,7 @@ export default function Home() {
                   {filteredServices.map((service) => (
                     <div
                       key={service.id}
-                      className="rounded-xl border border-zinc-800 bg-zinc-950 p-4"
+                      className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 transition hover:border-cyan-500/30"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -241,8 +245,8 @@ export default function Home() {
                             service.status === "Healthy"
                               ? "bg-emerald-500/10 text-emerald-400"
                               : service.status === "Warning"
-                                ? "bg-yellow-500/10 text-yellow-400"
-                                : "bg-red-500/10 text-red-400"
+                              ? "bg-yellow-500/10 text-yellow-400"
+                              : "bg-red-500/10 text-red-400"
                           }`}
                         >
                           {service.status}
@@ -268,30 +272,30 @@ export default function Home() {
                   <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
                     <p className="text-sm leading-7 text-zinc-300">
                       AI operational intelligence is connected to backend
-                      incident and service telemetry. The system is ready for
-                      production-style routing through Nginx.
+                      incident telemetry, deployment validation systems, and
+                      live infrastructure routing through Nginx.
                     </p>
                   </div>
 
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-zinc-400">
-                      Backend Integration Status
+                      Production Deployment Status
                     </h3>
 
                     <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300">
-                      Services, incidents, and logs are being retrieved through
-                      Nginx and routed to the Express API container.
+                      Docker containers, reverse proxy routing, GitHub Actions,
+                      and EC2 infrastructure are operating successfully.
                     </div>
                   </div>
 
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-zinc-400">
-                      Suggested Immediate Action
+                      Recommended Immediate Action
                     </h3>
 
                     <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300">
-                      Continue validating container routing before moving into
-                      CI/CD and cloud deployment.
+                      Continue expanding observability systems and deployment
+                      intelligence visualization.
                     </div>
                   </div>
 
@@ -301,6 +305,13 @@ export default function Home() {
                 </div>
               </section>
             </div>
+            
+            <SystemHealthBanner />
+            <OperationalMetricsPanel />
+            <InfrastructureTopologyPanel />
+            <CICDStatusPanel />
+            <DeploymentHistoryPanel />
+            <DeploymentTimelinePanel />
 
             <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg">
               <div className="mb-6 flex items-center justify-between">
@@ -338,8 +349,8 @@ export default function Home() {
                             incident.severity === "Critical"
                               ? "bg-red-500/10 text-red-400"
                               : incident.severity === "Warning"
-                                ? "bg-yellow-500/10 text-yellow-400"
-                                : "bg-emerald-500/10 text-emerald-400"
+                              ? "bg-yellow-500/10 text-yellow-400"
+                              : "bg-emerald-500/10 text-emerald-400"
                           }`}
                         >
                           {incident.severity}
@@ -458,8 +469,8 @@ export default function Home() {
                         log.level === "INFO"
                           ? "text-emerald-400"
                           : log.level === "WARN" || log.level === "WARNING"
-                            ? "text-yellow-400"
-                            : "text-red-400"
+                          ? "text-yellow-400"
+                          : "text-red-400"
                       }`}
                     >
                       [{log.level}]
